@@ -68,8 +68,12 @@ idx_z=DAG_find_column_index(tuning_per_unit_table,'electrode_depth');
 xyz                 = cell2mat(tuning_per_unit_table(row_index,[idx_x idx_y idx_z]));
 xyz(:,3)            = -xyz(:,3);   
 xyz_nojitter=xyz;
-
+switch saggital_or_coronal
+    case 'coronal'
 xyz(:,1)            = xyz(:,1) + (rand(size(xyz(:,1)))-0.5)*1.5; % jitter
+    case 'sagittal'
+xyz(:,2)            = xyz(:,2) + (rand(size(xyz(:,2)))-0.5)*1.5; % jitter
+end
 % xyz(:,3)            = xyz(:,3)-repmat(z_offset_mm,sum(row_index),1);                                            %% Z relative to brain start
 notes               = tuning_per_unit_table(row_index,DAG_find_column_index(tuning_per_unit_table,'unit_ID'));
 target              = target(row_index);
