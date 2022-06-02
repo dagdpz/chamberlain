@@ -6,7 +6,8 @@ function plot_electrode_localization(db_file,experiment_id,penetration_marker_co
 % db_file should contain one or more experiment_id
 % db_file should contain grid_id
 % db_file should contain vmr_path
-% db_file should contain z_offset_mm: distance from chamber top to "brain entry"
+% db_file should contain z_offset_mm: distance from chamber top (or grid top) to "brain entry" 
+% db_file should contain monkey_prefix
 
 if nargin < 3,
 	penetration_marker_color = 'r';
@@ -24,13 +25,16 @@ for k = 1:length(penetration_date),
 	[x(k) y(k) z(k)] = plot_coronal_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
 end
 
-if save_voi && exist([vmr_path(1:end-4) '.voi'],'file'), % save voi
-	voi = xff([vmr_path(1:end-4) '.voi']); % should be empty voi
-	
-	if voi.Convention == 1, % radiological
-		% x coordinates from plot_coronal_slice come as neurological, flip, e.g. 129->127: 128 - (129-128)
-		x = fix(voi.OriginalVMRFramingCubeDim/2) - (x - fix(voi.OriginalVMRFramingCubeDim/2));	
-	end
+if save_voi,
+    voi = xff('new:voi');
+	voi.FileVersion = 4;
+    voi.ReferenceSpace = 'ACPC';
+    voi.Convention = 2;
+    
+% 	if voi.Convention == 1, % radiological
+% 		% x coordinates from plot_coronal_slice come as neurological, flip, e.g. 129->127: 128 - (129-128)
+% 		x = fix(voi.OriginalVMRFramingCubeDim/2) - (x - fix(voi.OriginalVMRFramingCubeDim/2));	
+% 	end
 	
 	% voi coordinates order: y z x
 	voi.NrOfVOIs = k;
@@ -43,6 +47,8 @@ if save_voi && exist([vmr_path(1:end-4) '.voi'],'file'), % save voi
 	end
 	
 	voi.SaveAs([vmr_path(1:end-4) '_' experiment_id '.voi']);
+    disp([vmr_path(1:end-4) '_' experiment_id '.voi saved.']);
+    ne_voicoord2tal([vmr_path(1:end-4) '_' experiment_id '.voi']);
 end
 
 n_unique_sites = length(unique(xyz,'rows'));
