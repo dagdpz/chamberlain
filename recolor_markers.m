@@ -1,7 +1,7 @@
 function recolor_markers(color,hs,hn)
 
 % ha = findobj(gca,'Tag','penetration marker');
-s = 70/255;
+s = 128/255;
 e = 255/255;
 
 Ysorig_cell = get(hs,'YData');
