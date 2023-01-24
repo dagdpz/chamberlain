@@ -10,8 +10,12 @@ function CL_plot_electrode_localization(keys,experiment_id,co,save_voi,saggital_
 
 vmr_path = keys.vmr_path;
 z_offset_mm = keys.z_offset_mm;
-monkey_prefix = keys.monkey_prefix;
-target_area = keys.target_area;
+monkey_prefix = [upper(keys.monkey(1:2)) '_'];
+%target_area = keys.target_area;
+significant = keys.significant;
+xyz = keys.xyz;
+xyz_nojitter = keys.xyz_nojitter;
+penetration_date = keys.penetration_date;
 grid_id = keys.grid_id;
 
 
@@ -22,14 +26,13 @@ if nargin < 5,
     saggital_or_coronal='coronal';
 end
 
-CL_readout_from_tuning_table;
+%CL_readout_from_tuning_table;
 
 run('grid_db'); % need for grid spacing
 
 %% to create all vmrs
 penetration_date_any=1:size(significant,1);
 for k = penetration_date_any
-    %[x(k) y(k) z(k)] = plot_coronal_slice_smaller(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
     [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
 end
 
@@ -53,14 +56,13 @@ for f = 1:length(h_fig),
             grid_y= (xz_current_slice(:,1) - fix(UD.voxel_dim/2))*UD.voxel_size/grid_spacing;
             grid_x=repmat(UD.x_mm/grid_spacing,size(grid_y));
     end
-    current_locations=find(ismember(round(xyz_identifier*1000),round([grid_x grid_y grid_z]*1000),'rows'));
+    current_locations=ismember(round(xyz_identifier*1000),round([grid_x grid_y grid_z]*1000),'rows');
     unique_electrode_positions=unique(xyz_nojitter(current_locations,1))*grid_spacing/UD.voxel_size + fix(UD.voxel_dim/2);
     for p=unique_electrode_positions'
         line([p p],[0 UD.voxel_dim],'color','w','linestyle',':');
     end
     %delete(current_handles);
 end
-
 
 penetration_date_non_sig=find(~any(significant,2))';
 for k = penetration_date_non_sig
@@ -81,25 +83,20 @@ for c=1:size(significant,2)
     for k = penetration_date_sig
         [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
     end
-    
-    
     h_fig = get(0,'Children');
     for f = 1:length(h_fig),
         set(0,'CurrentFigure',h_fig(f));
         UD = get(h_fig(f),'UserData');
         set(findobj(gca,'Tag','penetration marker'),'Tag',['penetration marker ' num2str(c)]);
     end
-    
 end
 
 if save_voi && exist([vmr_path(1:end-4) '.voi'],'file'), % save voi
     voi = xff([vmr_path(1:end-4) '.voi']); % should be empty voi
-    
     if voi.Convention == 1, % radiological
         % x coordinates from plot_coronal_slice come as neurological, flip, e.g. 129->127: 128 - (129-128)
         x = fix(voi.OriginalVMRFramingCubeDim/2) - (x - fix(voi.OriginalVMRFramingCubeDim/2));
     end
-    
     % voi coordinates order: y z x
     voi.NrOfVOIs = k;
     for i = 1:k,
@@ -109,7 +106,6 @@ if save_voi && exist([vmr_path(1:end-4) '.voi'],'file'), % save voi
         % voi.VOI(i).Voxels = [y(i) z(i) x(i)];
         voi.VOI(i).NrOfVoxels = length(voi.VOI(i).Voxels);
     end
-    
     voi.SaveAs([vmr_path(1:end-4) '_' experiment_id '.voi']);
 end
 
@@ -142,7 +138,6 @@ for f = 1:length(h_fig),
     for c=1:size(significant,2)
         hn = findobj(gca,'Tag','penetration marker nonsignificant');
         hs = findobj(gca,'Tag',['penetration marker ' num2str(c)]);
-        
         for obj = hs
             set(obj,'Color',co{c});
         end
@@ -152,8 +147,6 @@ for f = 1:length(h_fig),
             set(obj,'Color','w');
         end
     end
-    
-    
 end
 end
 
