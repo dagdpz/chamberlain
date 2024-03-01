@@ -55,8 +55,6 @@ n_unique_sites = length(unique(xyz,'rows'));
 
 h_fig = get(0,'Children');
 
-% co = {'c','r','g'}; %linus -2,4 -1,3 0,2
-% co = {'r','g'}; %curius 3,5 5,3
 
 co = cellstr(repmat(penetration_marker_color,length(h_fig),1))';
 
@@ -71,9 +69,9 @@ for f = 1:length(h_fig),
     old_str = get(get(gca,'Title'),'String');
     title({char(old_str),sprintf('%s, %s (...,%d), %d sites %d unique sites',experiment_id,grid_id,xyz(this_slice_sites_idx(1),2),length(this_slice_sites_idx),n_unique_sites_this_slice)},'Interpreter','none');
     
-    % 	set(findobj(gca,'Tag','penetration marker'),'Color',penetration_marker_color);
-    ha = findobj(gca,'Tag','penetration marker');
-    recolor_markers(co{f},ha);
+    set(findobj(gca,'Tag','penetration marker'),'Color',penetration_marker_color);
+    % ha = findobj(gca,'Tag','penetration marker');
+    % recolor_markers(co{f},ha);
     set(findobj(gca,'Tag','penetration marker'),'Tag','penetration marker set');
     
 end
