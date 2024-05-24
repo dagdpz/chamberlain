@@ -155,6 +155,6 @@ switch saggital_or_coronal
     case 'coronal'
         [x y z] = plot_coronal_slice_smaller(vmr_path,xyz,z_offset_mm);
     case 'sagittal'
-        [x y z] = plot_sagittal_slice(vmr_path,xyz,z_offset_mm);
+        [x y z] = plot_sagittal_slice_smaller(vmr_path,xyz,z_offset_mm);
 end
 end
