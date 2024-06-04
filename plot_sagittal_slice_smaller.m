@@ -1,4 +1,4 @@
-function [x y z] = plot_sagittal_slice(filename,xyz_mm, z_offset_mm)
+function [x y z] = plot_sagittal_slice_smaller(filename,xyz_mm, z_offset_mm, marker_color)
 % plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0100\FL_20160509_STEREO_neurological.vmr',[-10 -20 30]);
 % plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0101\FL_20160509_left_chamber_normal_128.vmr',[-11*0.8 0.8 0]);
 
@@ -66,7 +66,7 @@ if UD.x_mm ~= xyz_mm(1), % new sagittal slice
     
 end
 
-hold on; plot(y,z,'ro','MarkerSize',0.5,'Tag','penetration marker');
+hold on; plot(y,z,'o','MarkerFaceColor', marker_color,'MarkerEdgeColor',marker_color/2,'MarkerSize',3,'Tag','penetration marker');
 
 xlabel([UD.filename ' x ' num2str(xyz_mm(1), 2) ' (' num2str(x) ')'] ,'Interpreter','none');
 set(gcf,'UserData',UD);

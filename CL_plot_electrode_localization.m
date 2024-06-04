@@ -1,4 +1,4 @@
-function CL_plot_electrode_localization(keys,experiment_id,co,save_voi,saggital_or_coronal)
+function CL_plot_electrode_localization(keys,experiment_id,co,save_voi,saggital_or_coronal, area_color)
 % e.g.
 % plot_electrode_localization('Curius_microstim_beh_electrode_localization_mat','Curius_microstim_beh_electrode_localization_dorsal_direct','r');
 % plot_electrode_localization('Linus_microstim_beh_electrode_localization_mat','Linus_microstim_beh_electrode_localization_dorsal_direct','r');
@@ -33,7 +33,7 @@ run('grid_db'); % need for grid spacing
 %% to create all vmrs
 penetration_date_any=1:size(significant,1);
 for k = penetration_date_any
-    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal, area_color);
 end
 
 %% annoying part to plot electrode tracks
@@ -67,7 +67,7 @@ end
 penetration_date_non_sig=find(~any(significant,2))';
 for k = penetration_date_non_sig
     %[x(k) y(k) z(k)] = plot_coronal_slice_smaller(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
-    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal,area_color);
 end
 
 for f = 1:length(h_fig),
@@ -81,7 +81,7 @@ end
 for c=1:size(significant,2)
     penetration_date_sig=find(significant(:,c))';
     for k = penetration_date_sig
-        [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+        [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal,area_color);
     end
     h_fig = get(0,'Children');
     for f = 1:length(h_fig),
@@ -150,11 +150,11 @@ for f = 1:length(h_fig),
 end
 end
 
-function [x y z] = plot_on_slice(vmr_path,xyz,z_offset_mm,saggital_or_coronal)
+function [x y z] = plot_on_slice(vmr_path,xyz,z_offset_mm,saggital_or_coronal, marker_color)
 switch saggital_or_coronal
     case 'coronal'
-        [x y z] = plot_coronal_slice_smaller(vmr_path,xyz,z_offset_mm);
+        [x y z] = plot_coronal_slice_smaller(vmr_path,xyz,z_offset_mm, marker_color);
     case 'sagittal'
-        [x y z] = plot_sagittal_slice_smaller(vmr_path,xyz,z_offset_mm);
+        [x y z] = plot_sagittal_slice_smaller(vmr_path,xyz,z_offset_mm, marker_color);
 end
 end
