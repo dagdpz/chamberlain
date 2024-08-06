@@ -46,7 +46,8 @@ for f = 1:length(h_fig),
     set(0,'CurrentFigure',h_fig(f));
     UD = get(h_fig(f),'UserData');
     current_handles=findobj(gca,'Tag','penetration marker');
-    xz_current_slice=cell2mat([get(current_handles, 'XData') get(current_handles, 'YData')]);
+    xz_current_slice=[get(current_handles, 'XData') get(current_handles, 'YData')];
+    if isa(xz_current_slice,'cell'); xz_current_slice=cell2mat(xz_current_slice); end
     grid_z= (xz_current_slice(:,2) - fix(UD.voxel_dim/2))*UD.voxel_size*-1;
     switch saggital_or_coronal
         case 'coronal'
