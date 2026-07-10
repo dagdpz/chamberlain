@@ -1,4 +1,4 @@
-function CL_plot_electrode_localization(keys,experiment_id,co,save_voi,saggital_or_coronal)
+function CL_plot_electrode_localization(keys,experiment_id,co,save_voi,saggital_or_coronal, area_color)
 % e.g.
 % plot_electrode_localization('Curius_microstim_beh_electrode_localization_mat','Curius_microstim_beh_electrode_localization_dorsal_direct','r');
 % plot_electrode_localization('Linus_microstim_beh_electrode_localization_mat','Linus_microstim_beh_electrode_localization_dorsal_direct','r');
@@ -25,6 +25,9 @@ end
 if nargin < 5,
     saggital_or_coronal='coronal';
 end
+if nargin < 6,
+    area_color = [1 0 0];
+end
 
 %CL_readout_from_tuning_table;
 
@@ -33,7 +36,7 @@ run('grid_db'); % need for grid spacing
 %% to create all vmrs
 penetration_date_any=1:size(significant,1);
 for k = penetration_date_any
-    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal, area_color);
 end
 
 %% annoying part to plot electrode tracks
@@ -44,22 +47,23 @@ xyz_identifier(:,3) = xyz(:,3) + z_offset_mm;
 h_fig = get(0,'Children');
 for f = 1:length(h_fig),
     set(0,'CurrentFigure',h_fig(f));
-    UD = get(h_fig(f),'UserData');
+    UD(f) = get(h_fig(f),'UserData');
     current_handles=findobj(gca,'Tag','penetration marker');
-    xz_current_slice=cell2mat([get(current_handles, 'XData') get(current_handles, 'YData')]);
-    grid_z= (xz_current_slice(:,2) - fix(UD.voxel_dim/2))*UD.voxel_size*-1;
+    xz_current_slice=[get(current_handles, 'XData') get(current_handles, 'YData')];
+    if isa(xz_current_slice,'cell'); xz_current_slice=cell2mat(xz_current_slice); end
+    grid_z= (xz_current_slice(:,2) - fix(UD(f).voxel_dim/2))*UD(f).voxel_size*-1;
     switch saggital_or_coronal
         case 'coronal'
-            grid_x= (xz_current_slice(:,1) - fix(UD.voxel_dim/2))*UD.voxel_size/grid_spacing;
-            grid_y=repmat(UD.y_mm/grid_spacing,size(grid_x));
+            grid_x= (xz_current_slice(:,1) - fix(UD(f).voxel_dim/2))*UD(f).voxel_size/grid_spacing;
+            grid_y=repmat(UD(f).y_mm/grid_spacing,size(grid_x));
         case 'sagittal'
-            grid_y= (xz_current_slice(:,1) - fix(UD.voxel_dim/2))*UD.voxel_size/grid_spacing;
-            grid_x=repmat(UD.x_mm/grid_spacing,size(grid_y));
+            grid_y= (xz_current_slice(:,1) - fix(UD(f).voxel_dim/2))*UD(f).voxel_size/grid_spacing;
+            grid_x=repmat(UD(f).x_mm/grid_spacing,size(grid_y));
     end
     current_locations=ismember(round(xyz_identifier*1000),round([grid_x grid_y grid_z]*1000),'rows');
-    unique_electrode_positions=unique(xyz_nojitter(current_locations,1))*grid_spacing/UD.voxel_size + fix(UD.voxel_dim/2);
+    unique_electrode_positions=unique(xyz_nojitter(current_locations,1))*grid_spacing/UD(f).voxel_size + fix(UD(f).voxel_dim/2);
     for p=unique_electrode_positions'
-        line([p p],[0 UD.voxel_dim],'color','w','linestyle',':');
+        line([p p],[0 UD(f).voxel_dim],'color','w','linestyle',':');
     end
     %delete(current_handles);
 end
@@ -67,12 +71,12 @@ end
 penetration_date_non_sig=find(~any(significant,2))';
 for k = penetration_date_non_sig
     %[x(k) y(k) z(k)] = plot_coronal_slice_smaller(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
-    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+    [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal,area_color);
 end
 
 for f = 1:length(h_fig),
     set(0,'CurrentFigure',h_fig(f));
-    UD = get(h_fig(f),'UserData');
+    UD(f) = get(h_fig(f),'UserData');
     set(findobj(gca,'Tag','penetration marker'),'Tag','penetration marker nonsignificant');
 end
 
@@ -81,12 +85,12 @@ end
 for c=1:size(significant,2)
     penetration_date_sig=find(significant(:,c))';
     for k = penetration_date_sig
-        [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal);
+        [x(k) y(k) z(k)] = plot_on_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm,saggital_or_coronal,area_color);
     end
     h_fig = get(0,'Children');
     for f = 1:length(h_fig),
         set(0,'CurrentFigure',h_fig(f));
-        UD = get(h_fig(f),'UserData');
+        UD(f) = get(h_fig(f),'UserData');
         set(findobj(gca,'Tag','penetration marker'),'Tag',['penetration marker ' num2str(c)]);
     end
 end
@@ -122,17 +126,20 @@ for f = 1:length(h_fig),
     set(0,'CurrentFigure',h_fig(f));
     switch saggital_or_coronal
         case 'coronal'
-            y_mm = UD.y_mm;
+            y_mm = UD(f).y_mm;
             this_slice_sites_idx = find(xyz(:,2)*grid_spacing==y_mm);
+            slice_coord_idx = 2;
         case 'sagittal'
-            x_mm = UD.x_mm;
+            x_mm = UD(f).x_mm;
             this_slice_sites_idx = find(xyz(:,1)*grid_spacing==x_mm);
+            slice_coord_idx = 1;
     end
     
     n_unique_sites_this_slice = size(unique(xyz(this_slice_sites_idx,:),'rows'),1);
     
     old_str = get(get(gca,'Title'),'String');
-    title({char(old_str),sprintf('%s, %s (...,%d), %d sites %d unique sites',experiment_id,grid_id,xyz(this_slice_sites_idx(1),2),length(this_slice_sites_idx),n_unique_sites_this_slice)},'Interpreter','none');
+    gridhole_coord = xyz(this_slice_sites_idx(1), slice_coord_idx);
+    title({char(old_str),sprintf('%s, %s (...,%s), %d sites %d unique sites',experiment_id,grid_id,num2str(gridhole_coord),length(this_slice_sites_idx),n_unique_sites_this_slice)},'Interpreter','none');
     
     % 	set(findobj(gca,'Tag','penetration marker'),'Color',penetration_marker_color);
     for c=1:size(significant,2)
@@ -150,11 +157,11 @@ for f = 1:length(h_fig),
 end
 end
 
-function [x y z] = plot_on_slice(vmr_path,xyz,z_offset_mm,saggital_or_coronal)
+function [x y z] = plot_on_slice(vmr_path,xyz,z_offset_mm,saggital_or_coronal, marker_color)
 switch saggital_or_coronal
     case 'coronal'
-        [x y z] = plot_coronal_slice_smaller(vmr_path,xyz,z_offset_mm);
+        [x y z] = plot_coronal_slice_smaller(vmr_path,xyz,z_offset_mm, marker_color);
     case 'sagittal'
-        [x y z] = plot_sagittal_slice(vmr_path,xyz,z_offset_mm);
+        [x y z] = plot_sagittal_slice_smaller(vmr_path,xyz,z_offset_mm, marker_color);
 end
 end
