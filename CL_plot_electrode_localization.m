@@ -25,6 +25,9 @@ end
 if nargin < 5,
     saggital_or_coronal='coronal';
 end
+if nargin < 6,
+    area_color = [1 0 0];
+end
 
 %CL_readout_from_tuning_table;
 
@@ -125,16 +128,18 @@ for f = 1:length(h_fig),
         case 'coronal'
             y_mm = UD(f).y_mm;
             this_slice_sites_idx = find(xyz(:,2)*grid_spacing==y_mm);
+            slice_coord_idx = 2;
         case 'sagittal'
             x_mm = UD(f).x_mm;
             this_slice_sites_idx = find(xyz(:,1)*grid_spacing==x_mm);
+            slice_coord_idx = 1;
     end
     
     n_unique_sites_this_slice = size(unique(xyz(this_slice_sites_idx,:),'rows'),1);
     
     old_str = get(get(gca,'Title'),'String');
-    gridhole_y = xyz(this_slice_sites_idx(1),2);
-    title({char(old_str),sprintf('%s, %s (...,%s), %d sites %d unique sites',experiment_id,grid_id,num2str(gridhole_y),length(this_slice_sites_idx),n_unique_sites_this_slice)},'Interpreter','none');
+    gridhole_coord = xyz(this_slice_sites_idx(1), slice_coord_idx);
+    title({char(old_str),sprintf('%s, %s (...,%s), %d sites %d unique sites',experiment_id,grid_id,num2str(gridhole_coord),length(this_slice_sites_idx),n_unique_sites_this_slice)},'Interpreter','none');
     
     % 	set(findobj(gca,'Tag','penetration marker'),'Color',penetration_marker_color);
     for c=1:size(significant,2)
