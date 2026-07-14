@@ -1,7 +1,7 @@
-function plot_electrode_localization_tuned(db_file,experiment_id,penetration_marker_color,save_voi) 
+function cl_plot_electrode_localization_tuned(db_file,experiment_id,penetration_marker_color,save_voi) 
 % e.g. 
-% plot_electrode_localization('Curius_microstim_beh_electrode_localization_mat','Curius_microstim_beh_electrode_localization_dorsal_direct','r');
-% plot_electrode_localization('Linus_microstim_beh_electrode_localization_mat','Linus_microstim_beh_electrode_localization_dorsal_direct','r');
+% cl_plot_electrode_localization('Curius_microstim_beh_electrode_localization_mat','Curius_microstim_beh_electrode_localization_dorsal_direct','r');
+% cl_plot_electrode_localization('Linus_microstim_beh_electrode_localization_mat','Linus_microstim_beh_electrode_localization_dorsal_direct','r');
 
 % db_file should contain one or more experiment_id
 % db_file should contain grid_id
@@ -18,12 +18,12 @@ end
 
 run(db_file); 
 
-run('grid_db'); % need for grid spacing
+run('cl_grid_db'); % need for grid spacing
 
 
 penetration_date_non_sig=find(~significant)';
 for k = penetration_date_non_sig
-	[x(k) y(k) z(k)] = plot_coronal_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
+	[x(k) y(k) z(k)] = cl_plot_coronal_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
 end
 
 h_fig = get(0,'Children');
@@ -35,14 +35,14 @@ end
 
 penetration_date_sig=find(significant)';
 for k = penetration_date_sig
-	[x(k) y(k) z(k)] = plot_coronal_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
+	[x(k) y(k) z(k)] = cl_plot_coronal_slice(vmr_path,[xyz(k,1:2)*grid_spacing xyz(k,3)],z_offset_mm);
 end
 
 if save_voi && exist([vmr_path(1:end-4) '.voi'],'file'), % save voi
 	voi = xff([vmr_path(1:end-4) '.voi']); % should be empty voi
 	
 	if voi.Convention == 1, % radiological
-		% x coordinates from plot_coronal_slice come as neurological, flip, e.g. 129->127: 128 - (129-128)
+		% x coordinates from cl_plot_coronal_slice come as neurological, flip, e.g. 129->127: 128 - (129-128)
 		x = fix(voi.OriginalVMRFramingCubeDim/2) - (x - fix(voi.OriginalVMRFramingCubeDim/2));	
 	end
 	
@@ -68,12 +68,10 @@ switch monkey
     case 'Cor';
         co = {'c','r','g','y'}; %linus -2,4 -1,3 0,2
 end
+	white_style = struct('FaceColor','w','EdgeColor','w','FaceAlpha',1,'EdgeAlpha',1);
 for f = 1:length(h_fig),
 	set(0,'CurrentFigure',h_fig(f));
- 	set(findobj(gca,'Tag','penetration marker nonsignificant'),'Color','w');
-%      ha = findobj(gca,'Tag','penetration marker');
-%      recolor_markers(co{f},ha);
-%	set(findobj(gca,'Tag','penetration marker'),'Tag','penetration marker set');
+	cl_apply_marker_style(findobj(gca,'Tag','penetration marker nonsignificant'), white_style, 5);
 end
 for f = 1:length(h_fig),
 	set(0,'CurrentFigure',h_fig(f));
@@ -89,7 +87,7 @@ for f = 1:length(h_fig),
 % 	set(findobj(gca,'Tag','penetration marker'),'Color',penetration_marker_color);
      hn = findobj(gca,'Tag','penetration marker nonsignificant');
      hs = findobj(gca,'Tag','penetration marker');
-     recolor_markers(co{f},hs,hn);
+     cl_recolor_markers(co{f},hs,hn);
 	set(findobj(gca,'Tag','penetration marker'),'Tag','penetration marker set');
     
 

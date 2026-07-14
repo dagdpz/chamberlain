@@ -1,11 +1,11 @@
-function grid_info = plot_grid(grid_id)
+function grid_info = cl_plot_grid(grid_id)
 
 n_cham_el = 128;
 
 UD.voxel_size = 1;
 UD.voxel_dim = 0; %128; % no need to set 128 for plotting the grid
  
-run('grid_db');
+run('cl_grid_db');
 
 grid_info.chamber = chamber;
 grid_info.spacing = grid_spacing;

@@ -1,11 +1,11 @@
-function chamberlain(varargin)
+function cl_chamberlain(varargin)
 % Needs NeuroElf/BVQXtools!
 % e.g. addpath('Y:\Sources\NeuroElf_v11_7521\');
 % Examples:
-% chamberlain('load_file','Z:\MRI\Hanuman\20101128cham\7\7_L_cham.vmr','R.G.3');
-% chamberlain('load_file','D:\MRI\Linus\20140725\ani_0783\0100\LI_20140725_T1_chamR_normal.vmr','GRID.22.1');
-% chamberlain(-8,[-2 -2]); % in mm
-% chamberlain('plot_grid',[3 3]); % in grid holes
+% cl_chamberlain('load_file','Z:\MRI\Hanuman\20101128cham\7\7_L_cham.vmr','R.G.3');
+% cl_chamberlain('load_file','D:\MRI\Linus\20140725\ani_0783\0100\LI_20140725_T1_chamR_normal.vmr','GRID.22.1');
+% cl_chamberlain(-8,[-2 -2]); % in mm
+% cl_chamberlain('plot_grid',[3 3]); % in grid holes
 
 if nargin < 1,
     disp('please specify inputs - action, anatomy file, grid, or location');
@@ -64,7 +64,7 @@ if strcmp(action,'load_anatomical'),
     
     set(0,'Userdata',UD);
     
-    chamberlain('plot_anatomical',0);
+    cl_chamberlain('plot_anatomical',0);
     
     
 elseif strcmp(action,'plot_anatomical')
@@ -85,11 +85,11 @@ elseif strcmp(action,'plot_anatomical')
     title(['z ' num2str(z_mm, '%2.f') ' (' num2str(z) ')']);
     xlabel(UD.filename,'Interpreter','none');
     
-    chamberlain('plot_chamber');
-    % chamberlain('plot_stereotaxic');
+    cl_chamberlain('plot_chamber');
+    % cl_chamberlain('plot_stereotaxic');
     
     if exist('xy_mm','var')
-        chamberlain('plot_location',xy_mm);
+        cl_chamberlain('plot_location',xy_mm);
     end
     
 elseif strcmp(action,'plot_stereotaxic'),
@@ -104,7 +104,7 @@ elseif strcmp(action,'plot_stereotaxic'),
 elseif strcmp(action,'plot_chamber')
     
     grid_id = UD.grid_id;
-    run('grid_db');
+    run('cl_grid_db');
     
     n_cham_el = 128;
     
@@ -117,7 +117,7 @@ elseif strcmp(action,'plot_chamber')
     ig_add_title([' ' grid_id]);
     
     if UD.plot_grid,
-        chamberlain('plot_grid');
+        cl_chamberlain('plot_grid');
     end
     
     % plot(0+UD.voxel_dim/2,0+UD.voxel_dim/2,'ro','MarkerSize',1/UD.voxel_size);
@@ -127,14 +127,14 @@ elseif strcmp(action,'plot_grid')
     UD.plot_grid = 1;
     
     grid_id = UD.grid_id;
-    run('grid_db');
+    run('cl_grid_db');
     
     xy = grid_spacing*xy_mm/UD.voxel_size;
     
     plot(xy(:,1)+UD.voxel_dim/2,-xy(:,2)+UD.voxel_dim/2,'y.','MarkerSize',0.1/UD.voxel_size);
     
     if nargin == 2,
-        chamberlain('plot_location',varargin{2}*grid_spacing);
+        cl_chamberlain('plot_location',varargin{2}*grid_spacing);
     end
     
     set(0,'UserData',UD);

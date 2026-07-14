@@ -1,10 +1,16 @@
-function [x y z] = plot_sagittal_slice(filename,xyz_mm, z_offset_mm)
-% plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0100\FL_20160509_STEREO_neurological.vmr',[-10 -20 30]);
-% plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0101\FL_20160509_left_chamber_normal_128.vmr',[-11*0.8 0.8 0]);
+function [x y z] = cl_plot_sagittal_slice_smaller(filename,xyz_mm, z_offset_mm, marker_style, plot_opts)
+% cl_plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0100\FL_20160509_STEREO_neurological.vmr',[-10 -20 30]);
+% cl_plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0101\FL_20160509_left_chamber_normal_128.vmr',[-11*0.8 0.8 0]);
 
 if nargin > 2,
     % correct for "from chamber top to the chamber center - brain entry"
     xyz_mm(3) = xyz_mm(3) + z_offset_mm;
+end
+if nargin < 4 || isempty(marker_style),
+    marker_style = [1 0 0];
+end
+if nargin < 5
+    plot_opts = struct();
 end
 
 figs = get(0,'Children');
@@ -66,7 +72,9 @@ if UD.x_mm ~= xyz_mm(1), % new sagittal slice
     
 end
 
-hold on; plot(y,z,'ro','MarkerSize',5,'Tag','penetration marker');
+hold on;
+marker_size = cl_parse_marker_style(marker_style, 3).MarkerSize;
+cl_plot_slice_marker(gca, [y z], marker_style, plot_opts, marker_size, 'sagittal');
 
 xlabel([UD.filename ' x ' num2str(xyz_mm(1), 2) ' (' num2str(x) ')'] ,'Interpreter','none');
 set(gcf,'UserData',UD);

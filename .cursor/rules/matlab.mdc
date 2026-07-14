@@ -1,0 +1,35 @@
+---
+description: MATLAB file structure and documentation conventions for chamberlain
+globs: **/*.m
+alwaysApply: false
+---
+
+# MATLAB (chamberlain)
+
+## File types
+
+- **One function per file** when the file is named after that function (`cl_foo.m` → `function ... = cl_foo`).
+- **Scripts** (`.m` without a leading `function`) must not contain `function` blocks. Use a separate `.m` file or a **function file with subfunctions** at the bottom.
+- **Subfunctions** are allowed only inside a **function file**, after the main `function` body.
+
+## Examples in headers
+
+Every new function/script must start with a **runnable** example in the header comment (copy-paste into MATLAB):
+
+```matlab
+% Example:
+%   addpath('E:\Dropbox\Sources\Repos\chamberlain');
+%   report = cl_pulv_bodysignals_bacchus_build_db;
+```
+
+No magic string dispatch (`switch example_name`) for “examples” — the body should be the real call with real paths.
+
+## This repo
+
+- Toolbox functions: `cl_*` at repo root; helpers in `helpers/`.
+- Project code: `cl_<project>_*` in subfolders (e.g. `Pulv_bodysignals/`).
+- Penetration DB builders: function file + `cl_create_penetration_db(...)` + `MapGroup` subfunction; see `cl_example_create_penetration_db.m` and `cl_pulv_bodysignals_bacchus_build_db.m`.
+
+## Before claiming code works
+
+If MATLAB MCP tools are available (`evaluate_matlab_code`, `run_matlab_file`), use them. Otherwise say validation was not run in MATLAB.

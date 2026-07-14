@@ -1,19 +1,19 @@
-function map_grid_penetrations(db_file,experiment_id)
+function cl_map_grid_penetrations(db_file,experiment_id)
 % Examples:
-% map_grid_penetrations('Linus microstim beh electrode MRI localization')
-% map_grid_penetrations('D:\Sources\MATLAB\chamberlain\db\Linus_microstim_beh_electrode_MRI_localization.m')
+% cl_map_grid_penetrations('Linus microstim beh electrode MRI localization')
+% cl_map_grid_penetrations('D:\Sources\MATLAB\cl_chamberlain\db\Linus_microstim_beh_electrode_MRI_localization.m')
 
 % db_file can be: 
-% 1) penetration_db.m
+% 1) cl_penetration_db_example.m
 % 2) name of separate db .m file
 
 
 run(db_file);
 
 
-figure('Name',['map_grid_penetrations: ' db_file],'Position',[100 100 1100 600],'Number','off');
+figure('Name',['cl_map_grid_penetrations: ' db_file],'Position',[100 100 1100 600],'Number','off');
 hAxex = axes('Units','normalized','Position',[0.05 0.05 0.4 0.8]); axis square;
-grid_info = plot_grid(grid_id);
+grid_info = cl_plot_grid(grid_id);
 title([experiment_id ' ' grid_id],'Interpreter','none');
 
 set(gcf,'Userdata',xyz*grid_info.spacing);

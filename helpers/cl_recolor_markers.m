@@ -1,4 +1,4 @@
-function recolor_markers(color,hs,hn)
+function cl_recolor_markers(color,hs,hn)
 
 % ha = findobj(gca,'Tag','penetration marker');
 s = 128/255;
@@ -40,7 +40,7 @@ switch color
 end
 
 for ind = 1:numel(hs)
-    set(hs_new(ind),'Color',cmo(ind,:));
+    set(hs_new(ind), 'MarkerFaceColor', cmo(ind,:), 'MarkerEdgeColor', cmo(ind,:)/2);
     uistack(hs_new(ind),'top');
 end
 

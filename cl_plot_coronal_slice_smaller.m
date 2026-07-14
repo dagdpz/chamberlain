@@ -1,18 +1,16 @@
-function [x y z] = plot_coronal_slice_smaller(filename,xyz_mm, z_offset_mm, marker_color)
-% plot_coronal_slice('D:\MRI\Linus\20140725\ani_0783\0100\LI_20140725_T1_chamR_normal.vmr',[0 0 0]);
-% plot_coronal_slice('D:\MRI\Linus\20140221elec\ani_0712\0005\LI_20130614_STEREO-TO-LI_20140221_Rcham_normal.vmr',[0 0 0]);
+function [x y z] = cl_plot_coronal_slice_smaller(filename,xyz_mm, z_offset_mm, marker_style, plot_opts)
+% cl_plot_coronal_slice('D:\MRI\Linus\20140725\ani_0783\0100\LI_20140725_T1_chamR_normal.vmr',[0 0 0]);
+% cl_plot_coronal_slice('D:\MRI\Linus\20140221elec\ani_0712\0005\LI_20130614_STEREO-TO-LI_20140221_Rcham_normal.vmr',[0 0 0]);
 
 if nargin > 2,
 	% correct for "from chamber top to the chamber center - brain entry"
 	xyz_mm(3) = xyz_mm(3) + z_offset_mm;
 end
-if nargin < 4 || isempty(marker_color),
-	marker_color = [1 0 0];
+if nargin < 4 || isempty(marker_style),
+	marker_style = [1 0 0];
 end
-if isnumeric(marker_color),
-	marker_edge_color = marker_color / 2;
-else
-	marker_edge_color = marker_color;
+if nargin < 5
+	plot_opts = struct();
 end
 
 figs = get(0,'Children');	
@@ -75,7 +73,9 @@ if UD.y_mm ~= xyz_mm(2), % new coronal slice
 	
 end
 
-hold on; plot(x,z,'o','MarkerFaceColor', marker_color,'MarkerEdgeColor',marker_edge_color,'MarkerSize',3,'linewidth',0.1,'Tag','penetration marker');
+hold on;
+marker_size = cl_parse_marker_style(marker_style, 3).MarkerSize;
+cl_plot_slice_marker(gca, [x z], marker_style, plot_opts, marker_size, 'coronal');
 
 xlabel([UD.filename ' y ' num2str(xyz_mm(2), 2) ' (' num2str(y) ')'] ,'Interpreter','none');
 set(gcf,'UserData',UD);
