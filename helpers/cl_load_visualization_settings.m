@@ -10,7 +10,8 @@ function cfg = cl_load_visualization_settings(db_file, experiment_id, viz_settin
 %      cl_myproject_bacchus_penetration_db -> cl_myproject_bacchus_visualization_settings
 %      my_penetration_db                     -> my_visualization_settings
 %
-% Returns struct with optional fields: marker_style, plot_opts, category_colors.
+% Returns struct with optional fields: marker_style, plot_opts (JitterFraction,
+% DrawTrajectory, Zoom), category_colors.
 % Missing file or unknown experiment_id in settings function -> empty fields.
 
 if nargin < 3

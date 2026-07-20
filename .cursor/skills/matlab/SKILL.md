@@ -12,11 +12,13 @@ description: >-
 The MathWorks extension gives **you** syntax highlighting, diagnostics, run/debug, and navigation in the editor. It does **not** inject that into the Cursor **agent** context. The agent will still guess MATLAB rules unless you add:
 
 1. **MCP** — run/check code in real MATLAB  
-2. **Skills / rules** — repo conventions (this file + `.cursor/rules/matlab.mdc`)
+2. **Skills / rules** — MCP setup (this file); chamberlain workflow + `.m` conventions (`.cursor/rules/matlab.mdc`)
 
 ## MCP setup (MathWorks official)
 
-Your global config is empty: `%USERPROFILE%\.cursor\mcp.json` has `"mcpServers": {}`.
+Full install/verify/troubleshooting: `.cursor/matlab_cursor_integration_readme.md`.  
+Portable MathWorks rules + skills: `.cursor/matlab-kit/README.md` + `install.ps1`.  
+Project workflow: `.cursor/rules/matlab.mdc`.
 
 ### 1. Install binary
 
@@ -28,7 +30,7 @@ Your global config is empty: `%USERPROFILE%\.cursor\mcp.json` has `"mcpServers":
 
 ### 2. Cursor config
 
-**Global** (`%USERPROFILE%\.cursor\mcp.json`) or **project** (`chamberlain/.cursor/mcp.json`):
+**Global** (`%USERPROFILE%\.cursor\mcp.json`) — chamberlain uses this only (no project `.cursor/mcp.json`):
 
 ```json
 {
@@ -37,7 +39,6 @@ Your global config is empty: `%USERPROFILE%\.cursor\mcp.json` has `"mcpServers":
       "command": "C:\\Users\\i.kagan\\.matlab\\agentic-toolkits\\bin\\matlab-mcp-server.exe",
       "args": [
         "--matlab-root=C:\\Program Files\\MATLAB\\R2025b",
-        "--initial-working-folder=E:\\Dropbox\\Sources\\Repos\\chamberlain",
         "--matlab-session-mode=auto"
       ]
     }
@@ -52,10 +53,10 @@ Adjust paths. Restart Cursor fully. In Agent chat, MCP should expose tools like 
 In MATLAB R2023a+:
 
 ```matlab
-shareMATLABSession("allow")
+shareMATLABSession()   % no arguments
 ```
 
-Then use `--matlab-session-mode=existing` (after `--setup-matlab` installed the toolbox).
+Run once per MATLAB session (or add to `startup.m`). With `--matlab-session-mode=auto` (default), MCP attaches to that session if available; use `existing` to require attach-only.
 
 ### 4. Verify
 
@@ -67,15 +68,4 @@ Broader domain skills (debugging, toolboxes, etc.): [github.com/matlab/matlab-ag
 
 ## chamberlain patterns
 
-- **Template:** `cl_example_create_penetration_db.m` — generic, placeholder paths.  
-- **Real project:** `Pulv_bodysignals/cl_pulv_bodysignals_bacchus_build_db.m` — full paths, calls `cl_create_penetration_db`.  
-- **Engine:** `cl_create_penetration_db.m` — do not duplicate Excel/MAT logic in project files.
-
-Header examples must be **literal MATLAB** the user can run, not opaque mode strings.
-
-## Agent checklist for new `.m` files
-
-- [ ] Script OR function file — never mix script + functions  
-- [ ] Runnable `Example:` block at top of help  
-- [ ] `cl_` naming matches repo layout  
-- [ ] If MCP available: run or syntax-check changed files
+See `.cursor/rules/matlab.mdc` for workflow, checklist, and prompt patterns.

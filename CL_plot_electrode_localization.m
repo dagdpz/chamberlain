@@ -1,18 +1,20 @@
-function cl_plot_electrode_localization(db_file,experiment_id,penetration_marker_style,save_voi,plot_opts)
+function cl_plot_electrode_localization(db_file,experiment_id,varargin)
 % e.g.
 % cl_plot_electrode_localization('Curius_microstim_beh_electrode_localization_mat','Curius_microstim_beh_electrode_localization_dorsal_direct','r');
 % cl_plot_electrode_localization(db_file, experiment_id);  % uses *_visualization_settings.m
 % cl_plot_electrode_localization(db_file, experiment_id, struct('FaceColor',[1 0 0],'EdgeColor','k','FaceAlpha',0.5));
 % cl_plot_electrode_localization(db_file, experiment_id, 'r', 0, struct('JitterFraction',0.5,'DrawTrajectory',true));
+% cl_plot_electrode_localization(db_file, experiment_id, 'r', 0, 'JitterFraction',0.5,'DrawTrajectory',true,'zoom',2);
 % db_file should contain one or more experiment_id
 % db_file should contain grid_id
 % db_file should contain vmr_path
 % db_file should contain z_offset_mm: distance from chamber top (or grid top) to "brain entry"
 % db_file should contain monkey_prefix
 
-if nargin < 4,
-    save_voi = 0;
-end
+save_voi = 0;
+plot_start = cl_plot_opts_start(varargin{:});
+positional = varargin(1:plot_start - 1);
+plot_args = varargin(plot_start:end);
 
 run(db_file);
 
@@ -22,19 +24,25 @@ if exist('viz_settings', 'var') && ischar(viz_settings) && ~isempty(viz_settings
 end
 cfg = cl_load_visualization_settings(db_file, experiment_id, viz_func);
 
-if nargin < 3,
-    if isfield(cfg, 'marker_style')
-        penetration_marker_style = cfg.marker_style;
-    else
-        penetration_marker_style = 'r';
-    end
+if isfield(cfg, 'marker_style')
+    penetration_marker_style = cfg.marker_style;
+else
+    penetration_marker_style = 'r';
 end
-if nargin < 5,
-    if isfield(cfg, 'plot_opts')
-        plot_opts = cfg.plot_opts;
-    else
-        plot_opts = struct();
-    end
+if isfield(cfg, 'plot_opts')
+    plot_opts = cfg.plot_opts;
+else
+    plot_opts = struct();
+end
+
+if numel(positional) >= 1
+    penetration_marker_style = positional{1};
+end
+if numel(positional) >= 2
+    save_voi = positional{2};
+end
+if ~isempty(plot_args)
+    plot_opts = cl_merge_plot_opts(plot_opts, plot_args{:});
 end
 
 parsed_marker = cl_parse_marker_style(penetration_marker_style, 5);

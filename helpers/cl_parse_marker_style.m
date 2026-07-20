@@ -4,9 +4,9 @@ function style = cl_parse_marker_style(marker_input, default_marker_size)
 %   style = cl_parse_marker_style('r')
 %   style = cl_parse_marker_style([1 0 0])
 %   style = cl_parse_marker_style(struct('FaceColor',[1 0 0],'EdgeColor','k',...
-%       'FaceAlpha',0.4,'EdgeAlpha',1))
+%       'FaceAlpha',0.4,'EdgeAlpha',1,'LineWidth',0.5))
 %
-%   Fields: FaceColor, EdgeColor, FaceAlpha, EdgeAlpha, MarkerSize
+%   Fields: FaceColor, EdgeColor, FaceAlpha, EdgeAlpha, MarkerSize, LineWidth
 
 if nargin < 2
     default_marker_size = [];
@@ -17,14 +17,15 @@ style = struct( ...
     'EdgeColor', [0.5 0 0], ...
     'FaceAlpha', 1, ...
     'EdgeAlpha', 1, ...
-    'MarkerSize', default_marker_size);
+    'MarkerSize', default_marker_size, ...
+    'LineWidth', 0.5);
 
 if nargin < 1 || isempty(marker_input)
     return;
 end
 
 if isstruct(marker_input)
-    fields = {'FaceColor','EdgeColor','FaceAlpha','EdgeAlpha','MarkerSize'};
+    fields = {'FaceColor','EdgeColor','FaceAlpha','EdgeAlpha','MarkerSize','LineWidth'};
     for i = 1:numel(fields)
         f = fields{i};
         if isfield(marker_input, f) && ~isempty(marker_input.(f))

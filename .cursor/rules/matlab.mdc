@@ -1,5 +1,5 @@
 ---
-description: MATLAB file structure and documentation conventions for chamberlain
+description: MATLAB conventions and chamberlain workflow for penetration DB, plotting, and MCP validation
 globs: **/*.m
 alwaysApply: false
 ---
@@ -18,18 +18,45 @@ Every new function/script must start with a **runnable** example in the header c
 
 ```matlab
 % Example:
-%   addpath('E:\Dropbox\Sources\Repos\chamberlain');
 %   report = cl_pulv_bodysignals_bacchus_build_db;
 ```
 
+(chamberlain + helpers are on MATLAB path; no `addpath` in examples.)
+
 No magic string dispatch (`switch example_name`) for “examples” — the body should be the real call with real paths.
 
-## This repo
+## Layout
 
 - Toolbox functions: `cl_*` at repo root; helpers in `helpers/`.
 - Project code: `cl_<project>_*` in subfolders (e.g. `Pulv_bodysignals/`).
-- Penetration DB builders: function file + `cl_create_penetration_db(...)` + `MapGroup` subfunction; see `cl_example_create_penetration_db.m` and `cl_pulv_bodysignals_bacchus_build_db.m`.
+
+## Chamberlain workflow
+
+| Task | Pattern |
+|------|---------|
+| New monkey/project | Copy `cl_example_create_penetration_db.m` → `Pulv_bodysignals/cl_<project>_<monkey>_build_db.m` |
+| Build DB | Builder function + `cl_create_penetration_db(...)` + `MapGroup` subfunction; run via MCP → `*_penetration_db.m` |
+| Visualization | Add `*_visualization_settings.m`; `cl_plot_electrode_localization(db, experiment_id)` |
+| Plotting logic | `cl_plot_*` + `helpers/cl_*` — never duplicate in project files |
+| Excel/MAT parsing | Only in `cl_create_penetration_db.m` |
+
+Reference files: `cl_example_create_penetration_db.m` (template), `Pulv_bodysignals/cl_pulv_bodysignals_bacchus_build_db.m` (real project), `cl_create_penetration_db.m` (engine).
+
+### Agent checklist (new `.m` files)
+
+- [ ] Script OR function file — never mix
+- [ ] Runnable `Example:` block with real paths
+- [ ] `cl_` naming matches layout above
+- [ ] If MCP available: `check_matlab_code` or run header example
+
+### Prompt patterns (Agent + MCP)
+
+- Syntax-check: `check_matlab_code` on changed `.m` files
+- Run header example literally via `evaluate_matlab_code` or `run_matlab_file`
+- Rebuild DB: run builder; confirm `ExpectedSiteCounts` in report
+- Plot: `cl_plot_electrode_localization` with `*_visualization_settings.m` (Y: drive, BrainVoyager, shared MATLAB for figures)
+- Debug: reproduce with `evaluate_matlab_code`, fix, re-run
 
 ## Before claiming code works
 
-If MATLAB MCP tools are available (`evaluate_matlab_code`, `run_matlab_file`), use them. Otherwise say validation was not run in MATLAB.
+If MATLAB MCP tools are available (`evaluate_matlab_code`, `run_matlab_file`), use them. Otherwise say validation was not run in MATLAB. MCP setup: `.cursor/matlab_cursor_integration_readme.md`.

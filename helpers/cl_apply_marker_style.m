@@ -3,7 +3,7 @@ function cl_apply_marker_style(h, marker_input, default_marker_size)
 %
 %   cl_apply_marker_style(h, 'r')
 %   cl_apply_marker_style(h, struct('FaceColor',[1 0 0],'EdgeColor','k',...
-%       'FaceAlpha',0.5,'EdgeAlpha',1))
+%       'FaceAlpha',0.5,'EdgeAlpha',1,'LineWidth',0.5))
 
 if nargin < 3
     default_marker_size = [];
@@ -24,7 +24,8 @@ for i = 1:numel(h)
     end
 
     set(hi, 'Marker', 'o', 'LineStyle', 'none', ...
-        'MarkerFaceColor', face, 'MarkerEdgeColor', edge);
+        'MarkerFaceColor', face, 'MarkerEdgeColor', edge, ...
+        'LineWidth', style.LineWidth);
     if ~isempty(style.MarkerSize)
         set(hi, 'MarkerSize', style.MarkerSize);
     end

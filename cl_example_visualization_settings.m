@@ -1,6 +1,9 @@
 function cfg = cl_example_visualization_settings(experiment_id)
 %CL_EXAMPLE_VISUALIZATION_SETTINGS  Template — copy for a new project.
 %
+% plot_opts.Zoom: 1 = full slice (default), 2 = central 50%, 4 = central 25%.
+%   cfg.plot_opts.Zoom = 2;
+% Callers can also pass pairs: cl_plot_coronal_slice(vmr, xyz, z_off, 'zoom', 2);
 % Naming convention (auto-discovered from penetration db filename):
 %   my_penetration_db.m              -> my_visualization_settings.m
 %   cl_myproject_penetration_db.m    -> cl_myproject_visualization_settings.m
@@ -13,9 +16,9 @@ function cfg = cl_example_visualization_settings(experiment_id)
 cfg = struct( ...
     'marker_style', struct( ...
         'FaceColor', [1 0 0], 'EdgeColor', 'k', ...
-        'FaceAlpha', 0.5, 'EdgeAlpha', 1, 'MarkerSize', 3), ...
+        'FaceAlpha', 0.5, 'EdgeAlpha', 1, 'MarkerSize', 3, 'LineWidth', 0.5), ...
         'plot_opts', struct( ...
-        'JitterFraction', 0.5, 'DrawTrajectory', true), ...
+        'JitterFraction', 0.5, 'DrawTrajectory', true), ...  % optional: 'Zoom', 2
         'category_colors', {{[1 0 0], [0 1 0]}});
 
 switch experiment_id
@@ -23,7 +26,7 @@ switch experiment_id
         cfg.plot_opts.JitterFraction = 0.75;
 
     case 'MyProject_area_R'
-        % per-experiment overrides
+        % cfg.plot_opts.Zoom = 2;  % central 50% crop
 
     otherwise
         error('Unknown experiment_id: %s', experiment_id);

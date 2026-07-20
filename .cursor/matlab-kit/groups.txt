@@ -1,0 +1,4 @@
+# Skill groups from matlab-agentic-toolkit/skills-catalog/
+# One group per line. matlab-core is required.
+matlab-core
+signal-processing

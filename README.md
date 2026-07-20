@@ -64,7 +64,9 @@ Marker styling and slice-plot utilities used by the slice plotters and batch loc
 | `helpers/cl_load_visualization_settings.m` | Resolve `*_visualization_settings.m` from db filename (or `viz_settings` override) |
 | `helpers/cl_parse_marker_style.m` | Normalize color char / RGB / struct into marker face/edge/alpha fields |
 | `helpers/cl_apply_marker_style.m` | Apply parsed style to existing plot handles |
-| `helpers/cl_parse_plot_options.m` | Jitter and trajectory options (`JitterFraction`, `DrawTrajectory`) |
+| `helpers/cl_parse_plot_options.m` | Slice plot options (`JitterFraction`, `DrawTrajectory`, `Zoom`) |
+| `helpers/cl_merge_plot_opts.m` | Merge `plot_opts` struct(s) and name-value pairs (`'zoom', 2`) |
+| `helpers/cl_apply_slice_zoom.m` | Crop slice axes to central `1/Zoom` fraction of the image |
 | `helpers/cl_marker_jitter_offset.m` | Per-marker jitter offset on slice plane |
 | `helpers/cl_plot_slice_marker.m` | Plot one penetration marker with style + jitter + optional trajectory line |
 | `helpers/cl_recolor_markers.m` | Depth-gradient recoloring of penetration markers |
@@ -99,6 +101,7 @@ Marker styling and slice-plot utilities used by the slice plotters and batch loc
 | `cl_pulv_bodysignals_magnus_penetration_db.m` | Generated Magnus db: `VP_L`, `dPul_L`, `dPul_R`, `MD_L` |
 | `cl_pulv_bodysignals_bacchus_visualization_settings.m` | Bacchus plot cfg (not overwritten by db rebuild) |
 | `cl_pulv_bodysignals_magnus_visualization_settings.m` | Magnus plot cfg (not overwritten by db rebuild) |
+| `cl_pulv_bodysignals_plot_monkey_coronal_overview.m` | Multi-panel coronal overview per nucleus/hemisphere (uses `plot_opts` from viz settings) |
 
 ## Usage
 
@@ -113,8 +116,9 @@ cl_chamberlain('plot_grid', [3 3]);       % grid holes; optional location in hol
 ### Single coronal/sagittal slice
 
 ```matlab
-% cl_plot_coronal_slice(filename, xyz_mm, z_offset_mm [, marker_style [, plot_opts]])
-% cl_plot_sagittal_slice(filename, xyz_mm, z_offset_mm [, marker_style [, plot_opts]])
+% cl_plot_coronal_slice(filename, xyz_mm, z_offset_mm, varargin...)
+% cl_plot_sagittal_slice(filename, xyz_mm, z_offset_mm, varargin...)
+% varargin: optional marker_style, then plot_opts struct and/or name-value pairs
 
 [x, y, z] = cl_plot_coronal_slice('path/to/chamber.vmr', [x_mm y_mm z_mm], z_offset_mm);
 [x, y, z] = cl_plot_sagittal_slice('path/to/chamber.vmr', [x_mm y_mm z_mm], z_offset_mm);
@@ -122,6 +126,11 @@ cl_chamberlain('plot_grid', [3 3]);       % grid holes; optional location in hol
 % Marker style + jitter/trajectory options (MarkerSize in style scales jitter)
 cl_plot_coronal_slice(vmr, xyz_mm, z_offset, struct('FaceColor',[1 0 0],'EdgeColor','k','MarkerSize',3), ...
     struct('JitterFraction',0.5,'DrawTrajectory',true));
+
+% Name-value pairs (case-insensitive); struct form still works
+cl_plot_coronal_slice(vmr, xyz_mm, z_offset, 'r', 'JitterFraction', 0.5, 'DrawTrajectory', true);
+cl_plot_coronal_slice(vmr, xyz_mm, z_offset, 'zoom', 2);                    % central 50%
+cl_plot_sagittal_slice(vmr, xyz_mm, z_offset, 'r', 'JitterFraction', 0.5, 'zoom', 2);
 ```
 
 Dense multi-site plots use `cl_plot_coronal_slice_smaller` / `cl_plot_sagittal_slice_smaller` (default `MarkerSize` 3). `cl_plot_electrode_localization_from_keys` and `_categories` call the `_smaller` variants.
@@ -132,12 +141,13 @@ DB `.m` files must define: `experiment_id`, `grid_id`, `vmr_path`, `z_offset_mm`
 
 ```matlab
 % Signature:
-% cl_plot_electrode_localization(db_file, experiment_id [, marker_style [, save_voi [, plot_opts]]])
+% cl_plot_electrode_localization(db_file, experiment_id, varargin...)
+% varargin: optional marker_style, save_voi (0/1), then plot_opts struct/pairs
 
 cl_plot_electrode_localization(db_file, experiment_id);  % loads *_visualization_settings.m
 
 cl_plot_electrode_localization('Linus_microstim_beh_electrode_MRI_localization', ...
-    'Linus_microstim_beh_electrode_MRI_localization_dorsal_direct', 'r');
+    'Linus_microstim_beh_electrode_localization_dorsal_direct', 'r');
 
 cl_plot_electrode_localization(db_file, experiment_id, 'r', 1);  % with VOI export
 
@@ -145,6 +155,12 @@ cl_plot_electrode_localization(db_file, experiment_id, 'r', 1);  % with VOI expo
 cl_plot_electrode_localization(db_file, experiment_id, ...
     struct('FaceColor',[1 0 0],'EdgeColor','k','FaceAlpha',0.5), 0, ...
     struct('JitterFraction',0.5,'DrawTrajectory',true));
+
+% Name-value pairs
+cl_plot_electrode_localization(db_file, experiment_id, 'r', 0, ...
+    'JitterFraction', 0.5, 'DrawTrajectory', true, 'zoom', 2);
+cl_plot_electrode_localization_categories(db_file, experiment_id, co, 0, ...
+    'DrawTrajectory', true, 'zoom', 2);
 ```
 
 #### Visualization settings (`*_visualization_settings.m`)
@@ -168,12 +184,13 @@ cfg = struct( ...
         'FaceColor', [1 0 0], 'EdgeColor', 'k', ...
         'FaceAlpha', 0.3, 'EdgeAlpha', 1, 'MarkerSize', 3), ...
     'plot_opts', struct( ...
-        'JitterFraction', 0.5, 'DrawTrajectory', true), ...
+        'JitterFraction', 0.5, 'DrawTrajectory', true), ...  % optional: 'Zoom', 2
     'category_colors', {{[1 0 0], [0 1 0]}});  % for _categories only
 
 switch experiment_id
     case 'Pulv_bodysignals_dPul_L'
         cfg.plot_opts.JitterFraction = 0.75;
+        % cfg.plot_opts.Zoom = 2;  % central 50% on dense experiments
     otherwise
         error('Unknown experiment_id: %s', experiment_id);
 end
@@ -185,7 +202,7 @@ Copy `cl_example_visualization_settings.m` as a starting point for new projects.
 | `cfg` field | Used by | Meaning |
 |-------------|---------|---------|
 | `marker_style` | `cl_plot_electrode_localization`, slice plotters | char, RGB, or struct (see below) |
-| `plot_opts` | slice plotters, batch functions | `JitterFraction`, `DrawTrajectory` |
+| `plot_opts` | slice plotters, batch functions | `JitterFraction`, `DrawTrajectory`, `Zoom` |
 | `category_colors` | `cl_plot_electrode_localization_categories` | cell of colors, one per `significant` column |
 
 **`marker_style` fields** (via `cl_parse_marker_style`):
@@ -204,6 +221,9 @@ Copy `cl_example_visualization_settings.m` as a starting point for new projects.
 |-------|---------|-------|
 | `JitterFraction` | `0` | Random offset in the **slice plane only**: left–right on coronal, anterior–posterior on sagittal. Range = fraction × marker diameter. Typical: `0.3`–`0.75`. Depth is never jittered. |
 | `DrawTrajectory` | `false` | One dashed white line per unique grid column on the slice; jitter moves markers only, not the line |
+| `Zoom` | `1` | Linear zoom on the slice image. `1` = full image (default). `2` = central 50%. `4` = central 25%. Applied after `imagesc` via `cl_apply_slice_zoom`. |
+
+Pass as struct fields, or as trailing name-value pairs (`'zoom', 2`, case-insensitive). `cl_merge_plot_opts` merges struct + pairs.
 
 On older MATLAB versions without `MarkerFaceAlpha`/`MarkerEdgeAlpha`, partial transparency is approximated by blending RGB toward gray.
 
@@ -238,7 +258,8 @@ cl_map_grid_penetrations('path/to/experiment_db.m');
 
 ```matlab
 run('cl_readout_from_tuning_table');  % sets keys fields in workspace
-cl_plot_electrode_localization_from_keys(keys, experiment_id, co, save_voi, 'coronal');
+cl_plot_electrode_localization_from_keys(keys, experiment_id, co, 0, 'coronal', area_color, ...
+    'JitterFraction', 0.5, 'DrawTrajectory', true, 'zoom', 2);
 % keys must contain: vmr_path, z_offset_mm, monkey, grid_id, xyz, xyz_nojitter,
 %                    penetration_date, significant
 ```
@@ -250,4 +271,5 @@ cl_plot_electrode_localization_from_keys(keys, experiment_id, co, save_voi, 'cor
 - `cl_plot_electrode_localization_tuned` and `_categories` expect a logical `significant` flag per penetration (or per category) in the db file. `_categories` also loads `category_colors` and `plot_opts` from `*_visualization_settings.m` when arguments are omitted.
 - `cl_readout_from_tuning_table` may add small pre-jitter to `xyz` in **grid coordinates** before plotting — separate from slice-plane `JitterFraction`.
 - `DrawTrajectory`: one fixed dashed line per unique grid column (LR on coronal, AP on sagittal); jitter offsets markers only, not the line.
+- `Zoom`: crops each slice axes to the central `1/Zoom` region after plotting; set in `plot_opts` or `*_visualization_settings.m` (`cfg.plot_opts.Zoom`). Also applies to `cl_pulv_bodysignals_plot_monkey_coronal_overview` via viz settings.
 - `cl_chamberlain` action strings (`'plot_grid'`, `'plot_location'`, etc.) are API names, not function filenames.

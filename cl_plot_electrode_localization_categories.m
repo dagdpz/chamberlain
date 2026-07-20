@@ -1,11 +1,14 @@
-function cl_plot_electrode_localization_categories(db_file,experiment_id,co,save_voi,plot_opts)
+function cl_plot_electrode_localization_categories(db_file,experiment_id,varargin)
 % Multi-category significance coloring; trajectories via plot_opts.DrawTrajectory.
 % cl_plot_electrode_localization_categories(db_file, experiment_id);  % uses *_visualization_settings.m
+% cl_plot_electrode_localization_categories(db_file, experiment_id, co, 0, struct('DrawTrajectory',true,'Zoom',2));
+% cl_plot_electrode_localization_categories(db_file, experiment_id, co, 0, 'DrawTrajectory',true,'zoom',2);
 % co: cell of colors per significance column; defaults to cfg.category_colors
 
-if nargin < 4,
-	save_voi = 0;
-end
+save_voi = 0;
+plot_start = cl_plot_opts_start(varargin{:});
+positional = varargin(1:plot_start - 1);
+plot_args = varargin(plot_start:end);
 
 run(db_file);
 
@@ -15,19 +18,25 @@ if exist('viz_settings', 'var') && ischar(viz_settings) && ~isempty(viz_settings
 end
 cfg = cl_load_visualization_settings(db_file, experiment_id, viz_func);
 
-if nargin < 3,
-    if isfield(cfg, 'category_colors')
-        co = cfg.category_colors;
-    else
-        co = {[1 0 0]};
-    end
+if isfield(cfg, 'category_colors')
+    co = cfg.category_colors;
+else
+    co = {[1 0 0]};
 end
-if nargin < 5,
-    if isfield(cfg, 'plot_opts')
-        plot_opts = cfg.plot_opts;
-    else
-        plot_opts = struct('DrawTrajectory', true);
-    end
+if isfield(cfg, 'plot_opts')
+    plot_opts = cfg.plot_opts;
+else
+    plot_opts = struct('DrawTrajectory', true);
+end
+
+if numel(positional) >= 1
+    co = positional{1};
+end
+if numel(positional) >= 2
+    save_voi = positional{2};
+end
+if ~isempty(plot_args)
+    plot_opts = cl_merge_plot_opts(plot_opts, plot_args{:});
 end
 
 run('cl_grid_db'); % need for grid spacing

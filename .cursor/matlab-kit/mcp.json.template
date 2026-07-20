@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "matlab": {
+      "command": "__MCP_SERVER__",
+      "args": [
+        "--matlab-root=__MATLAB_ROOT__",
+        "--matlab-session-mode=auto"
+      ]
+    }
+  }
+}

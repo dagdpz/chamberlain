@@ -1,0 +1,29 @@
+function data = cl_load_penetration_experiment(db_file, experiment_id)
+%CL_LOAD_PENETRATION_EXPERIMENT  Run penetration db for one experiment_id.
+%
+% Example:
+%   d = cl_load_penetration_experiment( ...
+%       'Pulv_bodysignals/cl_pulv_bodysignals_bacchus_penetration_db', ...
+%       'Pulv_bodysignals_dPul_L');
+
+% experiment_id is the function argument; penetration db switches on it.
+clear penetration_date xyz target notes vmr_path z_offset_mm n
+run(db_file); %#ok<RUN>
+
+data = struct( ...
+    'experiment_id', experiment_id, ...
+    'xyz', xyz, ...
+    'penetration_date', {penetration_date}, ...
+    'target', {target}, ...
+    'notes', {notes}, ...
+    'vmr_path', vmr_path, ...
+    'z_offset_mm', z_offset_mm);
+
+if exist('grid_id', 'var')
+    data.grid_id = grid_id;
+end
+if exist('monkey', 'var')
+    data.monkey = monkey;
+end
+
+end

@@ -6,7 +6,7 @@ if nargin < 6
 end
 
 style = cl_parse_marker_style(marker_style, default_marker_size);
-opts = cl_parse_plot_options(plot_opts, view);
+opts = cl_parse_plot_options(view, plot_opts);
 
 track_pos = plot_xy(1);  % true LR (coronal) or AP (sagittal) grid position
 plot_y = plot_xy(2);

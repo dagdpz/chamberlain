@@ -1,6 +1,9 @@
-function cl_plot_electrode_localization_from_keys(keys,experiment_id,co,save_voi,saggital_or_coronal, area_color, plot_opts)
+function cl_plot_electrode_localization_from_keys(keys,experiment_id,varargin)
 % e.g.
 % cl_plot_electrode_localization_from_keys(keys,'Curius_microstim_beh_electrode_localization_dorsal_direct',{'r','g','b'});
+% keys.plot_opts = struct('JitterFraction',0.5,'DrawTrajectory',true,'Zoom',2);
+% cl_plot_electrode_localization_from_keys(keys, experiment_id, co, 0, 'coronal', area_color, keys.plot_opts);
+% cl_plot_electrode_localization_from_keys(keys, experiment_id, co, 0, 'coronal', area_color, 'zoom', 2);
 % keys must contain: vmr_path, z_offset_mm, monkey, grid_id, xyz, xyz_nojitter,
 %                    penetration_date, significant
 
@@ -13,22 +16,33 @@ xyz_nojitter = keys.xyz_nojitter;
 penetration_date = keys.penetration_date;
 grid_id = keys.grid_id;
 
+save_voi = 0;
+saggital_or_coronal = 'coronal';
+area_color = [1 0 0];
+if isfield(keys, 'plot_opts')
+    plot_opts = keys.plot_opts;
+else
+    plot_opts = struct();
+end
 
-if nargin < 4,
-    save_voi = 0;
+plot_start = cl_plot_opts_start(varargin{:});
+positional = varargin(1:plot_start - 1);
+plot_args = varargin(plot_start:end);
+
+if numel(positional) >= 1
+    co = positional{1};
 end
-if nargin < 5,
-    saggital_or_coronal='coronal';
+if numel(positional) >= 2
+    save_voi = positional{2};
 end
-if nargin < 6,
-    area_color = [1 0 0];
+if numel(positional) >= 3
+    saggital_or_coronal = positional{3};
 end
-if nargin < 7,
-    if isfield(keys, 'plot_opts')
-        plot_opts = keys.plot_opts;
-    else
-        plot_opts = struct();
-    end
+if numel(positional) >= 4
+    area_color = positional{4};
+end
+if ~isempty(plot_args)
+    plot_opts = cl_merge_plot_opts(plot_opts, plot_args{:});
 end
 
 %cl_readout_from_tuning_table;

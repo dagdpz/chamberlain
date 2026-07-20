@@ -8,9 +8,9 @@ monkey = 'Mag';
 monkey_prefix = 'MA_';
 grid_id = 'GRID.22.3';
 right_vmr_path = 'Y:\MRI\Magnus\20230203\dicom\0100\MA_20230203_right_chamber_normal_neurological_0.25mm.vmr';
-right_z_offset_mm = 0; % set before plotting
+right_z_offset_mm = 39+7; % 19 + 20 mm, from grid top to image center, image is shifted 20 mm up
 left_vmr_path = 'Y:\MRI\Magnus\20230203\dicom\0100\MA_20230203_left_chamber_normal_neurological_0.25mm.vmr';
-left_z_offset_mm = 0; % set before plotting
+left_z_offset_mm = 38.5+7; % 18.5 + 20 mm, from grid top to image center, image is shifted 20 mm up
 
 n = 1;
 switch experiment_id

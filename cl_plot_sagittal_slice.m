@@ -1,17 +1,14 @@
-function [x y z] = cl_plot_sagittal_slice(filename,xyz_mm, z_offset_mm, marker_style, plot_opts)
+function [x y z] = cl_plot_sagittal_slice(filename,xyz_mm, z_offset_mm, varargin)
 % cl_plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0100\FL_20160509_STEREO_neurological.vmr',[-10 -20 30]);
 % cl_plot_sagittal_slice('Y:\MRI\Flaffus\20160509\dicom\0101\FL_20160509_left_chamber_normal_128.vmr',[-11*0.8 0.8 0]);
+% cl_plot_sagittal_slice(vmr, [x_mm y_mm z_mm], z_offset_mm, 'r', 'zoom', 2);
 
 if nargin > 2,
     % correct for "from chamber top to the chamber center - brain entry"
     xyz_mm(3) = xyz_mm(3) + z_offset_mm;
 end
-if nargin < 4 || isempty(marker_style),
-    marker_style = 'r';
-end
-if nargin < 5
-    plot_opts = struct();
-end
+[marker_style, plot_opts] = cl_parse_marker_and_plot_opts(varargin{:});
+slice_opts = cl_parse_plot_options('sagittal', plot_opts);
 
 figs = get(0,'Children');
 if ~isempty(figs), % figure(s) already exist
@@ -65,10 +62,9 @@ if UD.x_mm ~= xyz_mm(1), % new sagittal slice
     imagesc((squeeze(UD.X(:,:,x)))');
     UD.x_mm = xyz_mm(1);
     colormap(gray); axis square;
-    
-    hold on; line([15 15+5/UD.voxel_size],[10 10],'Color',[1 1 1],'LineWidth',3);
-    text(8,10,'A','Color',[1 1 1],'FontSize',14);
-    text(15,10+2/UD.voxel_size,'5 mm','Color',[1 1 1]);
+    cl_apply_slice_zoom(gca, slice_opts.Zoom);
+    cl_plot_slice_scale_bar(gca, UD.voxel_size, 'View', 'sagittal', ...
+        'LineWidth', 3, 'LabelFontSize', 14, 'TextFontSize', 14);
     
 end
 
